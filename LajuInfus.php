@@ -39,16 +39,17 @@ $teks = ($lang === 'en') ? $bahasa_en : $bahasa_id;
 
     <div class="form-box">
       <form action="HasilLajuInfus.php" method="POST">
-        <label class="text-label"><?php echo htmlspecialchars($teks['jenis_infus']); ?>:
-          <div class="radio-group">
-            <label><input type="radio" name="jenis_infus" value="mikrodrip" required>
-              <?php echo htmlspecialchars($teks['mikrodrip']); ?>
-            </label><br>
-            <label><input type="radio" name="jenis_infus" value="makrodrip" required>
-              <?php echo htmlspecialchars($teks['makrodrip']); ?>
-            </label>
-          </div>
-        </label>
+        <label class="text-label"><?php echo htmlspecialchars($teks['jenis_infus']); ?>:</label>
+        <div class="radio-group">
+          <label>
+            <input type="radio" name="jenis_infus" value="mikrodrip" required>
+            <?php echo htmlspecialchars($teks['mikrodrip']); ?>
+          </label><br>
+          <label>
+            <input type="radio" name="jenis_infus" value="makrodrip" required>
+            <?php echo htmlspecialchars($teks['makrodrip']); ?>
+          </label>
+        </div>
 
         <label><?php echo htmlspecialchars($teks['nama_lengkap']); ?>:
           <input type="text" name="Nama_Lengkap" required>
@@ -75,11 +76,11 @@ $teks = ($lang === 'en') ? $bahasa_en : $bahasa_id;
         </label>
 
         <label><?php echo htmlspecialchars($teks['dosis_mg']); ?>:
-          <input type="number" name="dosis_mg" step="0.01">
+          <input type="number" step="0.01" name="dosis_mg">
         </label>
 
         <label><?php echo htmlspecialchars($teks['konsentrasi']); ?>:
-          <input type="number" name="konsentrasi" step="0.01">
+          <input type="number" step="0.01" name="konsentrasi">
         </label>
 
         <button type="submit"><?php echo htmlspecialchars($teks['submit']); ?></button>

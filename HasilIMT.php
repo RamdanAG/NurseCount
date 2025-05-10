@@ -18,8 +18,11 @@ if (isset($_GET['hapus'])) {
 // Detail view jika ada id
 if (isset($_GET['id'])) {
   $id = (int)$_GET['id'];
-  $stmt = $pdo->prepare("SELECT * FROM hasil_imt WHERE id = ? AND user_id = ?");
-  $stmt->execute([$id, $user_id]);
+
+  $stmt = $pdo->query("SELECT * FROM hasil_imt WHERE id = ? AND user_id = ?");
+  $riwayat = $stmt->fetchAll(PDO::FETCH_ASSOC);  
+  // $stmt = $pdo->prepare("SELECT * FROM hasil_imt WHERE id = ? AND user_id = ?");
+  // $stmt->execute([$id, $user_id]);
   $data = $stmt->fetch(PDO::FETCH_ASSOC);
   if (!$data) die("Data tidak ditemukan.");
 ?>

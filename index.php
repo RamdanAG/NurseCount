@@ -44,9 +44,12 @@ $teks = $lang === 'en' ? $bahasa_en : $bahasa_id;
           <?= $teks['riwayat_data'] ?> <span class="arrow">▾</span>
         </button>
         <ul id="riwayatMenu" class="dropdown-menu">
-          <li><a href="HasilLukaBakar.php"><?= $teks['kebutuhan_kalori'] ?></a></li>
+          <li><a href="HasilLukaBakar.php"><?= $teks['lukabakar'] ?></a></li>
           <li><a href="HasilLajuInfus.php"><?= $teks['laju_infus'] ?></a></li>
           <li><a href="HasilIMT.php"><?= $teks['imt'] ?></a></li>
+          <li><a href="HasilGCS.php"><?= $teks['judul_index'] ?></a></li>
+          <li><a href="HasilDosisObat.php"><?= $teks['dosis_obat'] ?></a></li>
+          <li><a href="HasilKebutuhanCairan.php"><?= $teks['kebutuhan_cairan'] ?></a></li>
         </ul>
       </li>
 
@@ -94,6 +97,16 @@ $teks = $lang === 'en' ? $bahasa_en : $bahasa_id;
       <a href="GCS.php" class="btn">
         <img src="public/image/icons/home/8.png" alt="GCS" class="icon-img">
         <span class="btn-text"><?= $teks['judul_index'] ?></span>
+      </a>
+
+      <a href="DosisObat.php" class="btn">
+        <img src="public/image/icons/home/7.png" alt="GCS" class="icon-img">
+        <span class="btn-text"><?= $teks['dosis_obat'] ?></span>
+      </a>
+
+      <a href="KebutuhanCairan.php" class="btn">
+        <img src="public/image/icons/home/3.png" alt="GCS" class="icon-img">
+        <span class="btn-text"><?= $teks['kebutuhan_cairan'] ?></span>
       </a>
     </div>
   </main>
