@@ -50,6 +50,7 @@ $teks = $lang === 'en' ? $bahasa_en : $bahasa_id;
           <li><a href="HasilGCS.php"><?= $teks['judul_index'] ?></a></li>
           <li><a href="HasilDosisObat.php"><?= $teks['dosis_obat'] ?></a></li>
           <li><a href="HasilKebutuhanCairan.php"><?= $teks['kebutuhan_cairan'] ?></a></li>
+          <li><a href="HasilSkorMorse.php"><?= $teks['skorMorse'] ?></a></li>
         </ul>
       </li>
 
@@ -107,6 +108,16 @@ $teks = $lang === 'en' ? $bahasa_en : $bahasa_id;
       <a href="KebutuhanCairan.php" class="btn">
         <img src="public/image/icons/home/3.png" alt="GCS" class="icon-img">
         <span class="btn-text"><?= $teks['kebutuhan_cairan'] ?></span>
+      </a>
+
+      <a href="SkorMorse.php" class="btn">
+        <img src="public/image/icons/home/10.png" alt="GCS" class="icon-img">
+        <span class="btn-text"><?= $teks['skorMorse'] ?></span>
+      </a>
+      
+      <a href="SkorMorse.php" class="btn">
+        <img src="public/image/icons/home/10.png" alt="GCS" class="icon-img">
+        <span class="btn-text"><?= $teks['skorMorse'] ?></span>
       </a>
     </div>
   </main>

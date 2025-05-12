@@ -1,30 +1,30 @@
 <?php
 require_once __DIR__ . '/config/config.php';
+if (session_status() === PHP_SESSION_NONE) session_start();
 if (!isset($_SESSION['user'])) {
   header('Location: login.php');
   exit;
 }
 $user_id = $_SESSION['user']['id'];
 
-// Hapus data jika diminta
+// 1) Hapus data jika diminta (tanpa filter user_id)
 if (isset($_GET['hapus'])) {
   $hapusId = (int)$_GET['hapus'];
-  $stmt = $pdo->prepare("DELETE FROM hasil_imt WHERE id = ? AND user_id = ?");
-  $stmt->execute([$hapusId, $user_id]);
+  $stmt = $pdo->prepare("DELETE FROM hasil_imt WHERE id = ?");
+  $stmt->execute([$hapusId]);
   header("Location: HasilIMT.php?hapus_berhasil=1");
   exit;
 }
 
-// Detail view jika ada id
+// 2) Detail view jika ada id (tanpa filter user_id)
 if (isset($_GET['id'])) {
   $id = (int)$_GET['id'];
-
-  $stmt = $pdo->query("SELECT * FROM hasil_imt WHERE id = ? AND user_id = ?");
-  $riwayat = $stmt->fetchAll(PDO::FETCH_ASSOC);  
-  // $stmt = $pdo->prepare("SELECT * FROM hasil_imt WHERE id = ? AND user_id = ?");
-  // $stmt->execute([$id, $user_id]);
+  $stmt = $pdo->prepare("SELECT * FROM hasil_imt WHERE id = ?");
+  $stmt->execute([$id]);
   $data = $stmt->fetch(PDO::FETCH_ASSOC);
-  if (!$data) die("Data tidak ditemukan.");
+  if (!$data) {
+    die("Data tidak ditemukan.");
+  }
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -67,7 +67,7 @@ if (isset($_GET['id'])) {
   exit;
 }
 
-// Simpan data baru jika POST
+// 3) Simpan data baru jika POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $nama_lengkap  = trim($_POST['nama_lengkap']);
   $umur          = (int)$_POST['umur'];
@@ -77,18 +77,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $berat_kg      = (float)$_POST['berat_kg'];
   $tinggi_cm     = (float)$_POST['tinggi_cm'];
 
-  // Hitung IMT
-  $tinggi_m = $tinggi_cm / 100;
-  $imt = round($berat_kg / ($tinggi_m * $tinggi_m), 2);
-  // Tentukan kategori
-  if ($imt < 16)             $kategori = "Sangat Kurus";
-  elseif ($imt <= 18.5)      $kategori = "Kurus";
-  elseif ($imt <= 25)        $kategori = "Berat Badan Normal";
-  elseif ($imt <= 30)        $kategori = "Kelebihan Berat Badan";
-  elseif ($imt <= 35)        $kategori = "Obesitas Kelas 1";
-  elseif ($imt <= 40)        $kategori = "Obesitas Kelas 2";
-  else                       $kategori = "Obesitas Morbid";
+  // Validasi input
+  if ($tinggi_cm <= 0) {
+    die("Tinggi badan harus lebih besar dari 0.");
+  }
 
+  // Konversi ke meter & hitung IMT
+  $tinggi_m = $tinggi_cm / 100.0;
+  $imt = round($berat_kg / ($tinggi_m * $tinggi_m), 2);
+
+  // Tentukan kategori IMT
+  if ($imt < 16) {
+    $kategori = "Sangat Kurus";
+  } elseif ($imt < 18.5) {
+    $kategori = "Kurus";
+  } elseif ($imt < 25) {
+    $kategori = "Berat Badan Normal";
+  } elseif ($imt < 30) {
+    $kategori = "Kelebihan Berat Badan";
+  } elseif ($imt < 35) {
+    $kategori = "Obesitas Kelas 1";
+  } elseif ($imt < 40) {
+    $kategori = "Obesitas Kelas 2";
+  } else {
+    $kategori = "Obesitas Morbid";
+  }
+
+  // Simpan ke database
   $stmt = $pdo->prepare("
     INSERT INTO hasil_imt 
       (user_id, nama_lengkap, umur, alamat, jenis_kelamin, usia, berat_kg, tinggi_cm, imt, kategori)
@@ -111,9 +126,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   exit;
 }
 
-// Jika bukan POST & bukan detail, tampilkan history
-$stmt = $pdo->prepare("SELECT * FROM hasil_imt WHERE user_id = ? ORDER BY created_at DESC");
-$stmt->execute([$user_id]);
+// 4) Tampilkan semua riwayat (tanpa filter user_id)
+$stmt = $pdo->query("SELECT * FROM hasil_imt ORDER BY created_at DESC");
 $riwayat = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
@@ -231,7 +245,7 @@ const pagination = document.getElementById("pagination");
 
 function displayTable() {
   const start = (currentPage - 1) * rowsPerPage;
-  const end = start + rowsPerPage;
+  const end   = start + rowsPerPage;
   rows.forEach((row, i) => {
     row.style.display = (i >= start && i < end) ? "" : "none";
   });

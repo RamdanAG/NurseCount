@@ -1,17 +1,12 @@
 <?php
 require_once __DIR__ . '/config/config.php';
 if (session_status() === PHP_SESSION_NONE) session_start();
-if (!isset($_SESSION['user'])) {
-  header('Location: login.php');
-  exit;
-}
-$user_id = $_SESSION['user']['id'];
 
 // 1) Hapus data jika diminta
 if (isset($_GET['hapus'])) {
   $hapusId = (int)$_GET['hapus'];
-  $stmt = $pdo->prepare("DELETE FROM dosage_data WHERE id = ? AND user_id = ?");
-  $stmt->execute([$hapusId, $user_id]);
+  $stmt = $pdo->prepare("DELETE FROM dosage_data WHERE id = ?");
+  $stmt->execute([$hapusId]);
   header("Location: HasilDosisObat.php?hapus_berhasil=1");
   exit;
 }
@@ -19,11 +14,9 @@ if (isset($_GET['hapus'])) {
 // 2) Detail view jika ada id
 if (isset($_GET['id'])) {
   $id = (int)$_GET['id'];
-  // Ambil satu record dan juga riwayat
-  $stmt = $pdo->prepare("SELECT * FROM dosage_data WHERE user_id = ? ORDER BY created_at DESC");
-  $stmt->execute([$user_id]);
+  $stmt = $pdo->query("SELECT * FROM dosage_data ORDER BY created_at DESC");
   $riwayat = $stmt->fetchAll(PDO::FETCH_ASSOC);
-  // Cari data yang cocok dengan $id
+
   $data = null;
   foreach ($riwayat as $row) {
     if ((int)$row['id'] === $id) {
@@ -83,20 +76,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $aktiv  = (float)$_POST['aktivitas'];
   $stress = (float)$_POST['stress'];
 
-  // Rumus BMR (Mifflin - St Jeor)
   $jk = $_SESSION['user']['gender'] ?? 'L';
   if ($jk === 'L') {
     $bmr = (10 * $berat) + (6.25 * $tinggi) - (5 * $umur) + 5;
   } else {
     $bmr = (10 * $berat) + (6.25 * $tinggi) - (5 * $umur) - 161;
   }
-  // Total Energi
+
   $te = $bmr * $aktiv * $stress;
-  // Makronutrien
   $protein = ($te * 0.15) / 4;
   $karbo   = ($te * 0.55) / 4;
 
-  // Simpan ke DB
+  $userId = $_SESSION['user']['id'];
+
   $stmt = $pdo->prepare("
     INSERT INTO dosage_data
       (user_id, nama, umur, alamat, berat_kg, tinggi_cm,
@@ -105,18 +97,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   ");
   $stmt->execute([
-    $user_id, $nama, $umur, $alamat,
+    $userId, $nama, $umur, $alamat,
     $berat, $tinggi, $aktiv, $stress,
     $bmr, $te, $protein, $karbo
   ]);
+  
 
   header("Location: HasilDosisObat.php");
   exit;
 }
 
-// 4) Tampilkan riwayat jika bukan POST & bukan detail
-$stmt = $pdo->prepare("SELECT * FROM dosage_data WHERE user_id = ? ORDER BY created_at DESC");
-$stmt->execute([$user_id]);
+// 4) Ambil semua data
+$stmt = $pdo->query("SELECT * FROM dosage_data ORDER BY created_at DESC");
 $riwayat = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>

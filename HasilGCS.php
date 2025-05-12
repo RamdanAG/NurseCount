@@ -5,36 +5,25 @@ if (!isset($_SESSION['user'])) {
   header('Location: login.php');
   exit;
 }
-$user_id = $_SESSION['user']['id'];
 
-// 1) Hapus data jika diminta
+// 1) Hapus data jika diminta (tanpa filter user_id)
 if (isset($_GET['hapus'])) {
   $hapusId = (int)$_GET['hapus'];
-  $stmt = $pdo->prepare("DELETE FROM gcs_data WHERE id = ? AND user_id = ?");
-  $stmt->execute([$hapusId, $user_id]);
+  $stmt = $pdo->prepare("DELETE FROM gcs_data WHERE id = ?");
+  $stmt->execute([$hapusId]);
   header("Location: HasilGCS.php?hapus_berhasil=1");
   exit;
 }
 
-// 2) Detail view jika ada id
+// 2) Detail view jika ada id (tanpa filter user_id)
 if (isset($_GET['id'])) {
   $id = (int)$_GET['id'];
-
-  // Ambil detail record berdasarkan id dan user_id
-  $stmt = $pdo->prepare("SELECT * FROM gcs_data WHERE id = ? AND user_id = ?");
-  $stmt->execute([$id, $user_id]);
+  $stmt = $pdo->prepare("SELECT * FROM gcs_data WHERE id = ?");
+  $stmt->execute([$id]);
   $data = $stmt->fetch(PDO::FETCH_ASSOC);
   if (!$data) {
     die("Data tidak ditemukan.");
   }
-
-  // (Opsional) Ambil riwayat juga jika ingin ditampilkan di sidebar atau semacamnya
-  $stmt2 = $pdo->prepare("SELECT id, nama_lengkap, skor_total, created_at 
-                          FROM gcs_data 
-                          WHERE user_id = ? 
-                          ORDER BY created_at DESC");
-  $stmt2->execute([$user_id]);
-  $riwayat = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -45,38 +34,37 @@ if (isset($_GET['id'])) {
   <link rel="stylesheet" href="public/style/form.css">
 </head>
 <body>
-<a class="back" href="HasilGCS.php">« BACK</a>
-<div class="main-container">
-  <div class="content-text">
-    <h6>Kalkulator</h6>
-    <h2>Detail Glasgow Coma Scale</h2>
+  <a class="back" href="HasilGCS.php">« BACK</a>
+  <div class="main-container">
+    <div class="content-text">
+      <h6>Kalkulator</h6>
+      <h2>Detail Glasgow Coma Scale</h2>
+    </div>
+    <div class="form-box">
+      <p class="result-hjk"><strong>Nama:</strong> <?= htmlspecialchars($data['nama_lengkap']) ?></p>
+      <p class="result-hjk"><strong>Umur:</strong> <?= htmlspecialchars($data['umur']) ?> tahun</p>
+      <p class="result-hjk"><strong>Alamat:</strong> <?= htmlspecialchars($data['alamat']) ?></p>
+      <hr>
+      <p class="result-hjk"><strong>Jenis Kelamin:</strong> <?= htmlspecialchars($data['jenis_kelamin']) ?></p>
+      <p class="result-hjk"><strong>Skor E:</strong> <?= htmlspecialchars($data['skor_eye']) ?></p>
+      <p class="result-hjk"><strong>Skor V:</strong> <?= htmlspecialchars($data['skor_verbal']) ?></p>
+      <p class="result-hjk"><strong>Skor M:</strong> <?= htmlspecialchars($data['skor_motor']) ?></p>
+      <p class="result-hjk"><strong>Total Skor GCS:</strong> <?= htmlspecialchars($data['skor_total']) ?></p>
+      <p class="result-hjk"><strong>Status Kesadaran:</strong> <?= htmlspecialchars($data['status_kesadaran']) ?></p>
+      <a href="HasilGCS.php">
+        <button class="button-result">Kembali ke Riwayat</button>
+      </a>
+    </div>
   </div>
-
-  <div class="form-box">
-    <p class="result-hjk"><strong>Nama:</strong> <?= htmlspecialchars($data['nama_lengkap']) ?></p>
-    <p class="result-hjk"><strong>Umur:</strong> <?= htmlspecialchars($data['umur']) ?> tahun</p>
-    <p class="result-hjk"><strong>Alamat:</strong> <?= htmlspecialchars($data['alamat']) ?></p>
-    <hr>
-    <p class="result-hjk"><strong>Jenis Kelamin:</strong> <?= htmlspecialchars($data['jenis_kelamin']) ?></p>
-    <p class="result-hjk"><strong>Skor E:</strong> <?= htmlspecialchars($data['skor_eye']) ?></p>
-    <p class="result-hjk"><strong>Skor V:</strong> <?= htmlspecialchars($data['skor_verbal']) ?></p>
-    <p class="result-hjk"><strong>Skor M:</strong> <?= htmlspecialchars($data['skor_motor']) ?></p>
-    <p class="result-hjk"><strong>Total Skor GCS:</strong> <?= htmlspecialchars($data['skor_total']) ?></p>
-    <p class="result-hjk"><strong>Status Kesadaran:</strong> <?= htmlspecialchars($data['status_kesadaran']) ?></p>
-
-    <a href="HasilGCS.php">
-      <button class="button-result">Kembali ke Riwayat</button>
-    </a>
-  </div>
-</div>
 </body>
 </html>
 <?php
   exit;
 }
 
-// 3) Simpan data baru jika POST
+// 3) Simpan data baru jika POST (tetap sertakan user_id jika constraint FK masih ada)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $user_id = $_SESSION['user']['id'];
   $nama   = trim($_POST['nama_lengkap']);
   $umur   = (int)$_POST['umur'];
   $alamat = trim($_POST['alamat']);
@@ -107,9 +95,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   exit;
 }
 
-// 4) Tampilkan riwayat jika bukan POST & bukan detail
-$stmt = $pdo->prepare("SELECT * FROM gcs_data WHERE user_id = ? ORDER BY created_at DESC");
-$stmt->execute([$user_id]);
+// 4) Tampilkan riwayat tanpa filter user_id
+$stmt = $pdo->query("SELECT * FROM gcs_data ORDER BY created_at DESC");
 $riwayat = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
@@ -135,87 +122,88 @@ $riwayat = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </style>
 </head>
 <body>
-<a class="back" href="index.php">« BACK</a>
-<div class="main-container">
-  <div class="content-text">
-    <h6>Kalkulator</h6>
-    <h2>Riwayat Glasgow Coma Scale</h2>
-  </div>
-  <div class="form-box">
-    <?php if (isset($_GET['hapus_berhasil'])): ?>
-      <p class="result-hjk" style="color:green">Data berhasil dihapus.</p>
-    <?php endif; ?>
-
-    <input type="text" id="searchInput" class="search-box" placeholder="Cari nama atau umur..." onkeyup="filterTable()">
-
-    <div class="table-responsive">
-      <table id="riwayatTable">
-        <thead>
-          <tr>
-            <th>Nama</th>
-            <th>Umur</th>
-            <th>Total Skor</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody">
-          <?php foreach ($riwayat as $row): ?>
-            <tr>
-              <td><?= htmlspecialchars($row['nama_lengkap']) ?></td>
-              <td><?= htmlspecialchars($row['umur']) ?></td>
-              <td><?= htmlspecialchars($row['skor_total']) ?></td>
-              <td>
-                <a href="HasilGCS.php?id=<?= $row['id'] ?>">Lihat</a>
-                <a href="HasilGCS.php?hapus=<?= $row['id'] ?>" class="delete" onclick="return confirm('Yakin ingin menghapus data ini?')">Hapus</a>
-              </td>
-            </tr>
-          <?php endforeach; ?>
-        </tbody>
-      </table>
+  <a class="back" href="index.php">« BACK</a>
+  <div class="main-container">
+    <div class="content-text">
+      <h6>Kalkulator</h6>
+      <h2>Riwayat Glasgow Coma Scale</h2>
     </div>
+    <div class="form-box">
+      <?php if (isset($_GET['hapus_berhasil'])): ?>
+        <p class="result-hjk" style="color:green">Data berhasil dihapus.</p>
+      <?php endif; ?>
 
-    <div class="pagination" id="pagination"></div>
+      <input type="text" id="searchInput" class="search-box" placeholder="Cari nama atau umur..." onkeyup="filterTable()">
+
+      <div class="table-responsive">
+        <table id="riwayatTable">
+          <thead>
+            <tr>
+              <th>Nama</th>
+              <th>Umur</th>
+              <th>Total Skor</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <?php foreach ($riwayat as $row): ?>
+              <tr>
+                <td><?= htmlspecialchars($row['nama_lengkap']) ?></td>
+                <td><?= htmlspecialchars($row['umur']) ?></td>
+                <td><?= htmlspecialchars($row['skor_total']) ?></td>
+                <td>
+                  <a href="HasilGCS.php?id=<?= $row['id'] ?>">Lihat</a>
+                  <a href="HasilGCS.php?hapus=<?= $row['id'] ?>" class="delete" onclick="return confirm('Yakin ingin menghapus data ini?')">Hapus</a>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination" id="pagination"></div>
+    </div>
   </div>
-</div>
 
-<script>
-const rowsPerPage = 6,
-      tbody = document.getElementById("tableBody"),
-      rows = Array.from(tbody.querySelectorAll("tr")),
-      pagination = document.getElementById("pagination");
+  <script>
+    const rowsPerPage = 6,
+          tbody = document.getElementById("tableBody"),
+          rows = Array.from(tbody.querySelectorAll("tr")),
+          pagination = document.getElementById("pagination");
+    let currentPage = 1;
 
-function displayTable() {
-  const start = (currentPage-1) * rowsPerPage,
-        end   = start + rowsPerPage;
-  rows.forEach((r,i) => r.style.display = (i>=start && i<end) ? "" : "none");
-  renderPagination();
-}
+    function displayTable() {
+      const start = (currentPage-1) * rowsPerPage,
+            end   = start + rowsPerPage;
+      rows.forEach((r,i) => r.style.display = (i>=start && i<end) ? "" : "none");
+      renderPagination();
+    }
 
-function renderPagination(){
-  const total = rows.length,
-        pages = Math.ceil(total / rowsPerPage);
-  pagination.innerHTML = "";
-  for (let i=1; i<=pages; i++) {
-    const btn = document.createElement("button");
-    btn.textContent = i;
-    if (i === currentPage) btn.classList.add("active");
-    btn.onclick = () => { currentPage = i; displayTable(); };
-    pagination.appendChild(btn);
-  }
-}
+    function renderPagination(){
+      const total = rows.length,
+            pages = Math.ceil(total / rowsPerPage);
+      pagination.innerHTML = "";
+      for (let i=1; i<=pages; i++) {
+        const btn = document.createElement("button");
+        btn.textContent = i;
+        if (i === currentPage) btn.classList.add("active");
+        btn.onclick = () => { currentPage = i; displayTable(); };
+        pagination.appendChild(btn);
+      }
+    }
 
-function filterTable(){
-  const q = document.getElementById("searchInput").value.toLowerCase();
-  rows.forEach(r => {
-    const nama = r.cells[0].textContent.toLowerCase(),
-          umur = r.cells[1].textContent.toLowerCase();
-    r.style.display = (nama.includes(q) || umur.includes(q)) ? "" : "none";
-  });
-  currentPage = 1; displayTable();
-}
+    function filterTable(){
+      const q = document.getElementById("searchInput").value.toLowerCase();
+      rows.forEach(r => {
+        const nama = r.cells[0].textContent.toLowerCase(),
+              umur = r.cells[1].textContent.toLowerCase();
+        r.style.display = (nama.includes(q) || umur.includes(q)) ? "" : "none";
+      });
+      currentPage = 1;
+      displayTable();
+    }
 
-let currentPage = 1;
-displayTable();
-</script>
+    displayTable();
+  </script>
 </body>
 </html>

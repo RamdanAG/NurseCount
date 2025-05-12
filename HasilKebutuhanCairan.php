@@ -7,20 +7,20 @@ if (!isset($_SESSION['user'])) {
 }
 $user_id = $_SESSION['user']['id'];
 
-// 1) Hapus
+// 1) Hapus data jika diminta (tanpa filter user_id)
 if (isset($_GET['hapus'])) {
   $id = (int)$_GET['hapus'];
-  $pdo->prepare("DELETE FROM fluid_data WHERE id=? AND user_id=?")
-      ->execute([$id, $user_id]);
+  $pdo->prepare("DELETE FROM fluid_data WHERE id = ?")
+      ->execute([$id]);
   header("Location: HasilKebutuhanCairan.php?hapus=ok");
   exit;
 }
 
-// 2) Detail
+// 2) Detail view jika ada id (tanpa filter user_id)
 if (isset($_GET['id'])) {
   $id = (int)$_GET['id'];
-  $stmt = $pdo->prepare("SELECT * FROM fluid_data WHERE id=? AND user_id=?");
-  $stmt->execute([$id, $user_id]);
+  $stmt = $pdo->prepare("SELECT * FROM fluid_data WHERE id = ?");
+  $stmt->execute([$id]);
   $d = $stmt->fetch(PDO::FETCH_ASSOC);
   if (!$d) die("Data tidak ditemukan.");
 ?>
@@ -52,7 +52,7 @@ if (isset($_GET['id'])) {
       <p><strong>Per Jam:</strong> <?= round((float)$d['total_ml_per24']/24,2) ?> mL/jam</p>
     <?php else: ?>
       <p><strong>Per Jam:</strong> <?= round((float)$d['ml_per_jam'],2) ?> mL/jam</p>
-      <p><strong>Per 24 Jam:</strong> <?= round((float)$d['ml_per_jam']*24,2) ?> mL</p>
+      <p><strong>Per 24 Jam:</strong> <?= round((float)$d['ml_per_jam']*24,2) ?> mL</p>
     <?php endif; ?>
 
     <a href="HasilKebutuhanCairan.php"><button>Kembali ke Riwayat</button></a>
@@ -64,7 +64,6 @@ if (isset($_GET['id'])) {
   exit;
 }
 
-// 3) POST → hitung & simpan
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $nama   = trim($_POST['nama']);
   $umur   = (int)$_POST['umur'];
@@ -118,7 +117,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tot24 = $pj * 24;
   }
 
-  // Simpan
   $stmt = $pdo->prepare(
     "INSERT INTO fluid_data
      (user_id,nama,umur,alamat,mode_calc,berat_kg,kondisi,total_ml_per24,ml_per_jam)
@@ -135,15 +133,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   exit;
 }
 
-// 4) Tampilkan riwayat
-$stmt = $pdo->prepare("SELECT * FROM fluid_data WHERE user_id=? ORDER BY created_at DESC");
-$stmt->execute([$user_id]);
+// 4) Tampilkan semua riwayat (tanpa filter user_id)
+$stmt = $pdo->query("SELECT * FROM fluid_data ORDER BY created_at DESC");
 $riwayat = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8"><title>Riwayat Cairan</title>
+  <meta charset="UTF-8"><title>Riwayat Kebutuhan Cairan</title>
   <link rel="stylesheet" href="public/style/root.css">
   <link rel="stylesheet" href="public/style/form.css">
   <style>
@@ -185,10 +182,10 @@ $riwayat = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <?php foreach($riwayat as $r): ?>
             <tr>
               <td><?= htmlspecialchars($r['nama']) ?></td>
-              <td><?= $r['mode_calc']==='per24'?'24 jam':'Per Jam' ?></td>
+              <td><?= $r['mode_calc']==='per24'?'24 jam':'Per Jam' ?></td>
               <td>
                 <?php if ($r['mode_calc']==='per24'): ?>
-                  <?= round((float)$r['total_ml_per24'],2) ?> mL/24h
+                  <?= round((float)$r['total_ml_per24'],2) ?> mL
                 <?php else: ?>
                   <?= round((float)$r['ml_per_jam'],2) ?> mL/jam
                 <?php endif; ?>
@@ -206,10 +203,8 @@ $riwayat = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
 </div>
 <script>
-const rowsPerPage=6,
-      tbody=document.getElementById("tableBody"),
-      rows=Array.from(tbody.querySelectorAll("tr")),
-      pagination=document.getElementById("pagination");
+const rowsPerPage=6, tbody=document.getElementById("tableBody"),
+      rows=Array.from(tbody.querySelectorAll("tr")), pagination=document.getElementById("pagination");
 let currentPage=1;
 function displayTable(){
   const start=(currentPage-1)*rowsPerPage,end=start+rowsPerPage;
@@ -228,9 +223,7 @@ function renderPagination(){
 }
 function filterTable(){
   const q=document.getElementById("searchInput").value.toLowerCase();
-  rows.forEach(r=>{
-    r.style.display=r.cells[0].textContent.toLowerCase().includes(q)?"":"none";
-  });
+  rows.forEach(r=>r.style.display=r.cells[0].textContent.toLowerCase().includes(q)?"":"none");
   currentPage=1;displayTable();
 }
 displayTable();

@@ -13,6 +13,7 @@ $bahasa_id = [
   "laju_infus" => "Laju Infus",
   "imt" => "IMT",
   'bahasa' => 'Bahasa',
+  'skorMorse' => 'skor Morse',
 
   //LAJU INFUS
   'judul' => 'Laju Infus',
@@ -149,8 +150,32 @@ $bahasa_id = [
 'detail_cairan'        => 'Detail Kebutuhan Cairan',
 'kembali'              => 'Kembali',
 'pilih'                => 'Pilih',
-];
 
+//SKOR MORSE
+  'judul_morse' => 'Form Penilaian Skor Morse',
+  'kalkulator' => 'Kalkulator',
+  'back' => '« Kembali',
+  'nama_lengkap' => 'Nama Lengkap',
+  'usia' => 'Usia',
+  'alamat' => 'Alamat',
+  'riwayat_jatuh' => 'Riwayat Jatuh',
+  'diagnosis_sekunder' => 'Diagnosis Sekunder',
+  'bantuan_mobilitas' => 'Bantuan Mobilitas',
+  'terpasang_inpus' => 'Terpasang Infus',
+  'gaya_berjalan' => 'Gaya Berjalan',
+  'status_mental' => 'Status Mental',
+  'tidak' => 'Tidak',
+  'ya' => 'Ya',
+  'tidak_ada_kursi' => 'Tidak ada / Kursi roda',
+  'tongkat' => 'Tongkat / Walker',
+  'furniture' => 'Furniture',
+  'tidak_ada_tirah' => 'Tidak ada / Tirah baring',
+  'lemah' => 'Lemah',
+  'terganggu' => 'Terganggu',
+  'mengetahui_diri' => 'Mengetahui kemampuan diri',
+  'lupa_batas' => 'Lupa keterbatasan',
+  'submit' => 'Submit',
+];
 $bahasa_en = [
   "akun_saya" => "My Account",
   "riwayat_data" => "Data History",
@@ -163,6 +188,8 @@ $bahasa_en = [
   "laju_infus" => "Infusion Rate",
   "imt" => "BMI",
   'bahasa' => 'Language',
+  'skorMorse' => 'Morse score',
+
 
   //LAJU INFUS
   'judul' => 'Infusion Rate',
@@ -285,6 +312,31 @@ $bahasa_en = [
   'stress_pembedahan'  => 'Minor surgery',
   'stress_infeksi'     => 'Moderate infection',
   'stress_lukabakar'   => 'Burn injury',
+
+  //SKOR MORSE
+  'judul_morse' => 'Morse Fall Risk Assessment Form',
+  'kalkulator' => 'Calculator',
+  'back' => '« Back',
+  'nama_lengkap' => 'Full Name',
+  'usia' => 'Age',
+  'alamat' => 'Address',
+  'riwayat_jatuh' => 'History of Falls',
+  'diagnosis_sekunder' => 'Secondary Diagnosis',
+  'bantuan_mobilitas' => 'Mobility Aid',
+  'terpasang_inpus' => 'IV Therapy',
+  'gaya_berjalan' => 'Gait',
+  'status_mental' => 'Mental Status',
+  'tidak' => 'No',
+  'ya' => 'Yes',
+  'tidak_ada_kursi' => 'None / Wheelchair',
+  'tongkat' => 'Crutches / Walker',
+  'furniture' => 'Furniture',
+  'tidak_ada_tirah' => 'None / Bedridden',
+  'lemah' => 'Weak',
+  'terganggu' => 'Impaired',
+  'mengetahui_diri' => 'Aware of own ability',
+  'lupa_batas' => 'Forgets limitations',
+  'submit' => 'Submit',
 
   //KEBUTUHAN CAIRAN
   'kebutuhan_cairan'     => 'Fluid Requirements',
