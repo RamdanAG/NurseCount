@@ -19,7 +19,7 @@ $teks = ($lang === 'en') ? $bahasa_en : $bahasa_id;
   <link rel="stylesheet" href="public/style/form.css">
 </head>
 <body>
-  <a class="back" href="index.php">« Kembali</a>
+  <a class="back" href="index.php"><button class="back-button"><</button></a>
   <div class="main-container">
     <div class="content-text">
       <h6>Kalkulator</h6>
@@ -55,9 +55,9 @@ $teks = ($lang === 'en') ? $bahasa_en : $bahasa_id;
   <select name="kondisi" required>
     <option value=""><?php echo htmlspecialchars($teks['pilih']); ?></option>
     <option value="Normal"><?php echo htmlspecialchars($teks['normal']); ?></option>
-    <option value="Demam"><?php echo htmlspecialchars($teks['demam']); ?></option>
-    <option value="Dehidrasi Ringan"><?php echo htmlspecialchars($teks['dehidrasi_ringan']); ?></option>
-    <option value="Dehidrasi Berat"><?php echo htmlspecialchars($teks['dehidrasi_berat']); ?></option>
+    <option value="Demam/Fever"><?php echo htmlspecialchars($teks['demam']); ?></option>
+    <option value="Dehidrasi Ringan/Mild Dehydration"><?php echo htmlspecialchars($teks['dehidrasi_ringan']); ?></option>
+    <option value="Dehidrasi Berat/Severe Dehydration"><?php echo htmlspecialchars($teks['dehidrasi_berat']); ?></option>
   </select>
 </label>
 

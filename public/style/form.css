@@ -2,7 +2,10 @@
 /* Body & background */
 body {
   font-family: var(--font-secondary);
-  background: #e0f2fe;
+  background-image: url('../image/background/bg.jpg');
+  background-size: cover; /* Membuat gambar menutupi seluruh area */
+  background-position: center; /* Pusatkan gambar */
+  background-repeat: no-repeat; /* Hindari pengulangan gambar */
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -42,17 +45,28 @@ body {
 /* Tombol BACK */
 .back {
   position: absolute;
-  top: 3rem;
-  left: 3rem;
+  top: 2rem;
+  left: 2rem;
   font-size: 0.9rem;
-  color: #5397c4;
   text-decoration: none;
   font-weight: bold;
   z-index: 2;
 }
-.back:hover {
-  text-decoration: underline;
+.back-button {
+  background: white;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 0.5rem;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
 }
+
 
 /* Judul form */
 .form-box h2 {
@@ -177,5 +191,5 @@ body {
 }
 
 .result-hjk{
-  margin: 2rem;
+  margin: 1rem;
 }

@@ -15,13 +15,14 @@ $teks = ($lang === 'en') ? $bahasa_en : $bahasa_id;
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars($lang) ?>">
 <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($teks['judul_morse']) ?></title>
     <link rel="stylesheet" href="public/style/root.css">
     <link rel="stylesheet" href="public/style/form.css">
 </head>
 <body>
-<a class="back" href="index.php"><?= htmlspecialchars($teks['back']) ?></a>
+<a class="back" href="index.php"><button class="back-button"><</button></a>
 <div class="main-container">
     <div class="content-text">
         <h6><?= htmlspecialchars($teks['kalkulator']) ?></h6>

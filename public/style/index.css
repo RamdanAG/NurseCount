@@ -2,12 +2,16 @@
 /* Reset dan base styling */
 body {
   font-family: var(--font-secondary);
-  background: #e0f2fe;
+  background-image: url('../image/background/bg.jpg');
+  background-size: cover; /* Membuat gambar menutupi seluruh area */
+  background-position: center; /* Pusatkan gambar */
+  background-repeat: no-repeat; /* Hindari pengulangan gambar */
   color: #0f172a;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
+
 header { 
   position: fixed;
   display: flex;
@@ -58,31 +62,38 @@ header {
   display: flex;               /* flex row: icon + text */
   align-items: center;
   justify-content: center;
-  height: 100px;
+  height: 50px;
   width: 150px;
   border: 2px solid #5397c4;
-  border-radius: 0.5rem;
   background: #ffffff;
   text-decoration: none;
-  color: #0f172a;
+  color: #5397c4;
   transition: background 0.2s, border-color 0.2s;
+  border-radius: 0.5rem;
+  box-shadow: -1px 0px 0px 6px rgb(255, 255, 255);
+  -webkit-box-shadow: -1px 0px 0px 6px rgb(255, 255, 255);
+  -moz-box-shadow: -1px 0px 0px 6px rgb(242, 242, 242);
 }
 .btn:hover {
-  background: #bfdbfe;
-  border-color: #3b82f6;
+  background: #3b82f6;
+  color: white;
+  border-color: #ffffff;
+  box-shadow: -1px 0px 0px 6px rgb(255, 255, 255);
+  -webkit-box-shadow: -1px 0px 0px 6px rgb(255, 255, 255);
+  -moz-box-shadow: -1px 0px 0px 6px rgb(242, 242, 242);
 }
 
 /* Gaya gambar ikon */
 .icon-img {
   width: 24px;        /* sesuaikan ukuran jika perlu */
   height: 24px;
-  margin-right: 0.5rem;
+  margin-right: 0.3rem;
 }
 
 /* Gaya teks tombol */
 .btn-text {
   font-size: 0.95rem;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 /* overlay full-screen putih, awalnya di atas layar */

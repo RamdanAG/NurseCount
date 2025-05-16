@@ -27,8 +27,7 @@ $teks = ($lang === 'en') ? $bahasa_en : $bahasa_id;
   <link rel="stylesheet" href="public/style/form.css">
 </head>
 <body>
-  <a class="back" href="index.php"><?php echo htmlspecialchars($teks['back']); ?></a>
-
+<a class="back" href="index.php"><button class="back-button"><</button></a>
   <div class="main-container">
     <div class="content-text">
       <h6><?php echo htmlspecialchars($teks['kalkulator']); ?></h6>
@@ -40,8 +39,8 @@ $teks = ($lang === 'en') ? $bahasa_en : $bahasa_id;
         <label><?php echo htmlspecialchars($teks['jenis_kelamin']); ?>:
           <select name="jenis_kelamin" required>
             <option value=""><?php echo htmlspecialchars($teks['pilih']); ?></option>
-            <option value="Laki-laki">Laki-laki</option>
-            <option value="Perempuan">Perempuan</option>
+            <option value="Laki-laki/Men">Laki-laki/Men</option>
+            <option value="Perempuan/Female ">Perempuan/Female</option>
           </select>
         </label>
 

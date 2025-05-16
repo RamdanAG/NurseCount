@@ -18,7 +18,7 @@ $teks = ($lang === 'en') ? $bahasa_en : $bahasa_id;
   <link rel="stylesheet" href="public/style/form.css">
 </head>
 <body>
-  <a class="back" href="index.php"><?php echo htmlspecialchars($teks['back']); ?></a>
+  <a class="back" href="index.php"><button class="back-button"><</button></a>>
   <div class="main-container">
     <div class="content-text">
       <h6><?php echo htmlspecialchars($teks['kalkulator']); ?></h6>
@@ -38,7 +38,7 @@ $teks = ($lang === 'en') ? $bahasa_en : $bahasa_id;
 
         <div class="form-group">
           <label for="alamat"><?php echo htmlspecialchars($teks['alamat']); ?></label>
-          <textarea id="alamat" name="alamat" required rows="3"></textarea>
+          <input type="text" id="alamat" name="alamat" required>
         </div>
 
         <div class="form-group">

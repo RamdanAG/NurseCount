@@ -12,25 +12,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Semua field wajib diisi.';
     }
 
+    if (strlen($username) < 6) {
+        $errors[] = 'Username minimal 6 karakter.';
+    }
+
+    if (preg_match('/\s/', $username)) {
+        $errors[] = 'Username tidak boleh mengandung spasi.';
+    }
+
+    if (strlen($password) < 8) {
+        $errors[] = 'Password minimal 8 karakter.';
+    }
+
     if (empty($errors)) {
         // Hash password
         $hash = password_hash($password, PASSWORD_DEFAULT);
 
-        // Insert ke database
+        // Nilai default
+        $photo_profile = 'default_photo.jpg';
+        $alamat = 'Belum diisi';
+        $usia = 0;
+
         $stmt = $pdo->prepare(
-            'INSERT INTO users (nama_lengkap, username, password, role) VALUES (?, ?, ?, ?)'  
+            'INSERT INTO users (nama_lengkap, username, password, role, Photo_profile, alamat, usia)
+             VALUES (?, ?, ?, ?, ?, ?, ?)'
         );
         try {
             $stmt->execute([
                 $nama_lengkap,
                 $username,
                 $hash,
-                'user'
+                'admin',
+                $photo_profile,
+                $alamat,
+                $usia
             ]);
-            echo "<script>alert('Registrasi berhasil!'); window.location.href = 'login.php';</script>";
-            exit;
+            exit; // Anda bisa redirect ke halaman login di sini jika mau
         } catch (PDOException $e) {
-            // Jika username duplikat
             if ($e->getCode() === '23000') {
                 $errors[] = 'Username sudah terdaftar.';
             } else {
@@ -45,27 +63,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="public/css/styles.css">
     <title>Register - NurseCount</title>
+    <link rel="stylesheet" href="public/css/styles.css">
     <link rel="stylesheet" href="public/style/login.css">
+    <link rel="stylesheet" href="public/style/root.css">
 </head>
 <body>
-    <div class="login-container">
-        <h2>REGISTER</h2>
-        <?php if ($errors): ?>
+    <div class="bg">
+        <div class="backgroundLogin">
+            <h2 class="login">REGISTER</h2>
+
+            <?php if ($errors): ?>
             <ul class="error">
-                <?php foreach ($errors as $e): ?><li><?= htmlspecialchars($e) ?></li><?php endforeach; ?>
+                <?php foreach ($errors as $e): ?>
+                <li><?= htmlspecialchars($e) ?></li>
+                <?php endforeach; ?>
             </ul>
-        <?php endif; ?>
-        <form action="register.php" method="POST" class="form-grid">
-            <input type="text" name="nama_lengkap" placeholder="Nama Lengkap" required>
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <button type="submit">Daftar</button>
-        </form>
-        <p>
-            Sudah punya akun? <a href="login.php">Login di sini</a>
-        </p>
+            <?php endif; ?>
+
+            <form action="register.php" method="POST" class="form-grid">
+                <input class="input-field" type="text" name="nama_lengkap" placeholder="Name" required>
+                <input class="input-field" type="text" name="username" placeholder="Username" minlength="6" pattern="^\S+$" required>
+                <input class="input-field" type="password" name="password" placeholder="Password" minlength="8" required>
+                <button type="submit">Register</button>
+            </form>
+            <a href="login.php">Already have an account? Login here</a>
+        </div>
     </div>
+
+    <script>
+    // Mencegah input spasi pada username
+    document.querySelector('input[name="username"]').addEventListener('input', function () {
+        this.value = this.value.replace(/\s/g, '');
+    });
+    </script>
 </body>
 </html>

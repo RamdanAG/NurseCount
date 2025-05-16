@@ -29,7 +29,7 @@ $teks = ($lang === 'en') ? $bahasa_en : $bahasa_id;
   <link rel="stylesheet" href="public/style/form.css">
 </head>
 <body>
-  <a class="back" href="index.php"><?php echo htmlspecialchars($teks['back']); ?></a>
+  <a class="back" href="index.php"><button class="back-button"><</button></a>
 
   <div class="main-container">
     <div class="content-text">

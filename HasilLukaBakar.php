@@ -1,11 +1,16 @@
 <?php
 // HasilLukaBakar.php
 require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '/lang/lang.php';
+
 if (session_status() === PHP_SESSION_NONE) session_start();
 if (!isset($_SESSION['user'])) {
   header('Location: login.php');
   exit;
 }
+
+$lang = $_SESSION['user']['lang'] ?? 'id';
+$teks = ($lang === 'en') ? $bahasa_en : $bahasa_id;
 
 // 1) Hapus data jika diminta (tanpa filter user_id)
 if (isset($_GET['hapus'])) {
@@ -22,90 +27,91 @@ if (isset($_GET['id'])) {
   $stmt = $pdo->prepare("SELECT * FROM hasil_lukabakar WHERE id = ?");
   $stmt->execute([$id]);
   $data = $stmt->fetch(PDO::FETCH_ASSOC);
-  if (!$data) die("Data tidak ditemukan.");
-  ?>
-  <!DOCTYPE html>
-  <html lang="id">
-  <head>
-    <meta charset="UTF-8">
-    <title>Detail Luka Bakar</title>
-    <link rel="stylesheet" href="public/style/root.css">
-    <link rel="stylesheet" href="public/style/form.css">
-  </head>
-  <body>
-    <a class="back" href="HasilLukaBakar.php">« BACK</a>
-    <div class="main-container">
-      <div class="content-text">
-        <h6>Kalkulator</h6>
-        <h2>Detail Luka Bakar</h2>
-      </div>
-      <div class="form-box">
-        <p><strong>TBSA:</strong> <?= htmlspecialchars($data['tbsa']) ?>%</p>
-        <p><strong>Total Cairan:</strong> <?= number_format($data['total_cairan']) ?> mL</p>
-        <p><strong>8 jam pertama:</strong> <?= number_format($data['cairan_8jam']) ?> mL</p>
-        <p><strong>16 jam berikutnya:</strong> <?= number_format($data['cairan_16jam']) ?> mL</p>
-        <hr>
-        <p><strong>Berat Badan:</strong> <?= htmlspecialchars($data['berat_kg']) ?> kg</p>
-        <p><strong>Usia:</strong> <?= htmlspecialchars($data['usia']) ?> tahun</p>
-        <?php if ($data['foto']): ?>
-          <p><strong>Foto:</strong></p>
-          <img src="public/image/LukaBakar/<?= htmlspecialchars($data['foto']) ?>" alt="Foto Luka" style="max-width:100%;height:auto;">
-        <?php endif; ?>
-        <a href="HasilLukaBakar.php"><button>Kembali ke Riwayat</button></a>
-      </div>
+  if (!$data) die($teks['data_tidak_ditemukan'] ?? "Data tidak ditemukan.");
+?>
+<!DOCTYPE html>
+<html lang="<?= htmlspecialchars($lang) ?>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title><?= htmlspecialchars($teks['detail_luka_bakar']) ?></title>
+  <link rel="stylesheet" href="public/style/root.css">
+  <link rel="stylesheet" href="public/style/form.css">
+</head>
+<body>
+<a class="back" href="HasilLukaBakar.php"><button class="back-button"><</button></a>
+  <div class="main-container">
+    <div class="content-text">
+      <h6><?= htmlspecialchars($teks['kalkulator']) ?></h6>
+      <h2><?= htmlspecialchars($teks['detail_luka_bakar']) ?></h2>
     </div>
-  </body>
-  </html>
-  <?php
+    <div class="form-box">
+      <p class="result-hjk"><strong><?= htmlspecialchars($teks['nama']) ?>:</strong> <?= htmlspecialchars($data['nama']) ?></p>
+      <p class="result-hjk"><strong><?= htmlspecialchars($teks['alamat']) ?>:</strong> <?= htmlspecialchars($data['alamat']) ?></p>
+      <p class="result-hjk"><strong><?= htmlspecialchars($teks['tbsa']) ?>:</strong> <?= htmlspecialchars($data['tbsa']) ?>%</p>
+      <p class="result-hjk"><strong><?= htmlspecialchars($teks['total_cairan']) ?>:</strong> <?= number_format($data['total_cairan']) ?> mL</p>
+      <p class="result-hjk"><strong><?= htmlspecialchars($teks['cairan_8jam']) ?>:</strong> <?= number_format($data['cairan_8jam']) ?> mL</p>
+      <p class="result-hjk"><strong><?= htmlspecialchars($teks['cairan_16jam']) ?>:</strong> <?= number_format($data['cairan_16jam']) ?> mL</p>
+      <hr>
+      <p class="result-hjk"><strong><?= htmlspecialchars($teks['berat_kg']) ?>:</strong> <?= htmlspecialchars($data['berat_kg']) ?> kg</p>
+      <p class="result-hjk"><strong><?= htmlspecialchars($teks['usia']) ?>:</strong> <?= htmlspecialchars($data['usia']) ?> <?= htmlspecialchars($teks['tahun'] ?? 'tahun') ?></p>
+      <a href="HasilLukaBakar.php">
+        <button class="button-result"><?= htmlspecialchars($teks['kembali']) ?></button>
+      </a>
+    </div>
+  </div>
+</body>
+</html>
+<?php
   exit;
 }
 
-// 3) Simpan data baru jika POST (tetap sertakan user_id untuk FK jika diperlukan)
+// 3) Simpan data baru jika POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $parts    = $_POST['area_parts'] ?? [];
   $berat_kg = (float)$_POST['berat_kg'];
   $usia     = (int)$_POST['usia'];
+  $nama     = $_POST['nama'] ?? '';
+  $alamat   = $_POST['alamat'] ?? '';
+
+  // Validasi input
+  if (empty($nama) || empty($alamat)) {
+    die($teks['error_nama_alamat'] ?? "Nama dan alamat harus diisi.");
+  }
 
   // Hitung TBSA & Parkland
-  $tbsa = array_sum(array_map('floatval', $parts));
-  $total = round(4 * $berat_kg * $tbsa);
-  $c8 = round($total / 2);
-  $c16 = $total - $c8;
-
-  // Upload gambar jika ada
-  $fotoNama = null;
-  if (!empty($_FILES['gambar']['tmp_name'])) {
-    $uploadDir = __DIR__ . '/public/image/LukaBakar/';
-    if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-    $fotoNama = time() . '_' . basename($_FILES['gambar']['name']);
-    move_uploaded_file($_FILES['gambar']['tmp_name'], $uploadDir . $fotoNama);
-  }
+  $tbsa   = array_sum(array_map('floatval', $parts));
+  $total  = round(4 * $berat_kg * $tbsa);
+  $c8     = round($total / 2);
+  $c16    = $total - $c8;
 
   // Insert ke DB
   $stmt = $pdo->prepare("
-    INSERT INTO hasil_lukabakar 
-      (user_id, tbsa, total_cairan, cairan_8jam, cairan_16jam, berat_kg, usia, foto, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+    INSERT INTO hasil_lukabakar
+      (user_id, nama, alamat, tbsa, total_cairan, cairan_8jam, cairan_16jam,
+       berat_kg, usia, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
   ");
   $stmt->execute([
-    $_SESSION['user']['id'], // tetap simpan user_id
+    $_SESSION['user']['id'],
+    $nama, $alamat,
     $tbsa, $total, $c8, $c16,
-    $berat_kg, $usia, $fotoNama
+    $berat_kg, $usia
   ]);
-
   header("Location: HasilLukaBakar.php");
   exit;
 }
 
-// 4) Tampilkan semua riwayat (tanpa filter user_id)
+// 4) Tampilkan riwayat (semua user)
 $stmt = $pdo->query("SELECT * FROM hasil_lukabakar ORDER BY created_at DESC");
 $riwayat = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
-<html lang="id">
+<html lang="<?= htmlspecialchars($lang) ?>">
 <head>
   <meta charset="UTF-8">
-  <title>Riwayat Luka Bakar</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title><?= htmlspecialchars($teks['riwayat_luka_bakar']) ?></title>
   <link rel="stylesheet" href="public/style/root.css">
   <link rel="stylesheet" href="public/style/form.css">
   <style>
@@ -121,36 +127,43 @@ $riwayat = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </style>
 </head>
 <body>
-  <a class="back" href="index.php">« BACK</a>
+  <a class="back" href="index.php"><button class="back-button"><</button></a>
   <div class="main-container">
     <div class="content-text">
-      <h6>Kalkulator</h6>
-      <h2>Riwayat Luka Bakar</h2>
+      <h6><?= htmlspecialchars($teks['kalkulator']) ?></h6>
+      <h2><?= htmlspecialchars($teks['riwayat_luka_bakar']) ?></h2>
     </div>
     <div class="form-box">
       <?php if (isset($_GET['hapus_berhasil'])): ?>
-        <p style="color:green">Data berhasil dihapus.</p>
+        <p class="result-hjk" style="color:green"><?= htmlspecialchars($teks['data_berhasil_dihapus']) ?></p>
       <?php endif; ?>
-      <input type="text" id="searchInput" class="search-box" placeholder="Cari TBSA atau usia..." onkeyup="filterTable()">
+
       <div class="table-responsive">
         <table id="riwayatTable">
           <thead>
             <tr>
-              <th>TBSA (%)</th>
-              <th>Usia</th>
-              <th>Total Cairan (mL)</th>
-              <th>Aksi</th>
+              <th><?= htmlspecialchars($teks['nama']) ?></th>
+              <th><?= htmlspecialchars($teks['alamat']) ?></th>
+              <th><?= htmlspecialchars($teks['tbsa']) ?></th>
+              <th><?= htmlspecialchars($teks['usia']) ?></th>
+              <th><?= htmlspecialchars($teks['total_cairan']) ?></th>
+              <th><?= htmlspecialchars($teks['aksi'] ?? 'Aksi') ?></th>
             </tr>
           </thead>
           <tbody id="tableBody">
-            <?php foreach ($riwayat as $row): ?>
+            <?php foreach($riwayat as $row): ?>
               <tr>
+                <td><?= htmlspecialchars($row['nama']) ?></td>
+                <td><?= htmlspecialchars($row['alamat']) ?></td>
                 <td><?= htmlspecialchars($row['tbsa']) ?></td>
                 <td><?= htmlspecialchars($row['usia']) ?></td>
                 <td><?= number_format($row['total_cairan']) ?></td>
                 <td>
-                  <a href="HasilLukaBakar.php?id=<?= $row['id'] ?>">Lihat</a>
-                  <a href="HasilLukaBakar.php?hapus=<?= $row['id'] ?>" class="delete" onclick="return confirm('Yakin ingin menghapus?')">Hapus</a>
+                  <a href="?id=<?= $row['id'] ?>"><?= htmlspecialchars($teks['lihat']) ?></a>
+                  <a href="?hapus=<?= $row['id'] ?>" class="delete"
+                     onclick="return confirm('<?= htmlspecialchars($teks['confirm_hapus'] ?? 'Yakin ingin menghapus?') ?>')">
+                    <?= htmlspecialchars($teks['hapus']) ?>
+                  </a>
                 </td>
               </tr>
             <?php endforeach; ?>
@@ -162,14 +175,13 @@ $riwayat = $stmt->fetchAll(PDO::FETCH_ASSOC);
   </div>
 
   <script>
-    let currentPage=1, rowsPerPage=6;
-    const tbody=document.getElementById('tableBody'),
+    const rowsPerPage=6, tbody=document.getElementById('tableBody'),
           rows=Array.from(tbody.querySelectorAll('tr')),
           pagination=document.getElementById('pagination');
-
+    let currentPage=1;
     function displayTable(){
       const start=(currentPage-1)*rowsPerPage, end=start+rowsPerPage;
-      rows.forEach((r,i)=> r.style.display=(i>=start&&i<end)?'':'none');
+      rows.forEach((r,i)=>r.style.display=(i>=start&&i<end)?'':'none');
       renderPagination();
     }
     function renderPagination(){
@@ -186,9 +198,10 @@ $riwayat = $stmt->fetchAll(PDO::FETCH_ASSOC);
     function filterTable(){
       const q=document.getElementById('searchInput').value.toLowerCase();
       rows.forEach(r=>{
-        const tbsa=r.cells[0].textContent.toLowerCase(),
-              usia=r.cells[1].textContent.toLowerCase();
-        r.style.display=(tbsa.includes(q)||usia.includes(q))?'':'none';
+        const nama=r.cells[0].textContent.toLowerCase(),
+              alamat=r.cells[1].textContent.toLowerCase(),
+              tbsa=r.cells[2].textContent.toLowerCase();
+        r.style.display=(nama.includes(q)||alamat.includes(q)||tbsa.includes(q))?'':'none';
       });
       currentPage=1; displayTable();
     }

@@ -3,7 +3,7 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--font-secondary);
 }
 
 /* Background luar */
@@ -13,7 +13,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background: url('image/bg.webp') center/cover no-repeat;
+    background-image: url('../image/background/bg.jpg');
+    background-size: cover; /* Membuat gambar menutupi seluruh area */
+    background-position: center; /* Pusatkan gambar */
+    background-repeat: no-repeat; /* Hindari pengulangan gambar */
 }
 
 /* Kotak login transparan */
@@ -35,6 +38,7 @@
     font-size: 2rem;
     color: #ffffff;
     margin-bottom: 2rem;
+    font-family: var(--font-main);
 }
 
 /* Input field styling */

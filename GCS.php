@@ -23,7 +23,7 @@ $teks = ($lang === 'en') ? $bahasa_en : $bahasa_id;
   <link rel="stylesheet" href="public/style/form.css">
 </head>
 <body>
-  <a class="back" href="index.php"><?= htmlspecialchars($teks['back']) ?></a>
+  <a class="back" href="index.php"><button class="back-button"><</button></a>
   <div class="main-container">
     <div class="content-text">
       <h6><?= htmlspecialchars($teks['kalkulator']) ?></h6>
@@ -31,6 +31,13 @@ $teks = ($lang === 'en') ? $bahasa_en : $bahasa_id;
     </div>
     <div class="form-box">
       <form action="HasilGCS.php" method="POST">
+       <label class="text-label"><?= htmlspecialchars($teks['jenis_kelamin']) ?>:
+          <div class="radio-group">
+            <label><input type="radio" name="jenis_kelamin" value="Laki-laki/Men" required> <?= htmlspecialchars($teks['laki_laki']) ?></label><br>
+            <label><input type="radio" name="jenis_kelamin" value="Perempuan/Female" required> <?= htmlspecialchars($teks['perempuan']) ?></label>
+          </div>
+        </label>
+
         <label><?= htmlspecialchars($teks['nama_lengkap']) ?>:
           <input type="text" name="nama_lengkap" required>
         </label>
@@ -40,12 +47,7 @@ $teks = ($lang === 'en') ? $bahasa_en : $bahasa_id;
         <label><?= htmlspecialchars($teks['alamat']) ?>:
           <input type="text" name="alamat" required>
         </label>
-        <label class="text-label"><?= htmlspecialchars($teks['jenis_kelamin']) ?>:
-          <div class="radio-group">
-            <label><input type="radio" name="jenis_kelamin" value="Laki-laki" required> <?= htmlspecialchars($teks['laki_laki']) ?></label><br>
-            <label><input type="radio" name="jenis_kelamin" value="Perempuan" required> <?= htmlspecialchars($teks['perempuan']) ?></label>
-          </div>
-        </label>
+       
         <label><?= htmlspecialchars($teks['eye_response']) ?>:
           <select name="eye" required>
             <option value="">-- <?= htmlspecialchars($teks['pilih']) ?> --</option>
